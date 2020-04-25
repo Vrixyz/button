@@ -1,7 +1,15 @@
-[workspace]
-members = [
-  "src/button",
-]
+[package]
+name = "button"
+version = "0.1.0"
+authors = ["Thierry Berger <contact@thierryberger.com>"]
+edition = "2018"
+
+[dependencies]
+stm32f3-discovery = "*"
+cortex-m = "0.6.2"
+cortex-m-rt = "0.6.12"
+panic-halt = "0.2.0"
+
 
 [profile.release]
 codegen-units = 1

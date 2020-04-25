@@ -1,5 +1,6 @@
 #![no_std]
 #![no_main]
+// rust bug: https://github.com/rust-analyzer/rust-analyzer/issues/3801
 
 use cortex_m_rt::entry;
 
