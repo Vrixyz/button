@@ -5,11 +5,19 @@ authors = ["Thierry Berger <contact@thierryberger.com>"]
 edition = "2018"
 
 [dependencies]
-stm32f3-discovery = "*"
-cortex-m = "0.6.2"
-cortex-m-rt = "0.6.12"
-panic-halt = "0.2.0"
+cortex-m = "0.5.6"
+panic-itm = "0.4.1"
+panic-halt = "*"
+panic-semihosting = "*"
 
+[dependencies.cortex-m-rt]
+# For interrupt
+features = ["device"]
+version = "0.6.12"
+
+[dependencies.f3]
+features = ["rt"]
+version = "0.6.1"
 
 [profile.release]
 codegen-units = 1
