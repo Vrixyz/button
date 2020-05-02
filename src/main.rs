@@ -111,6 +111,9 @@ fn main() -> ! {
     loop {
         match user_button.handle_user_button() {
             ButtonState::RiseNew => {
+
+                usart1.tdr.write(|w| w.tdr().bits(u16::from(b'X')));
+                usart1.tdr.write(|w| w.tdr().bits(u16::from(b'\n')));
                 if led_on {
                     led.off();
                 }
