@@ -35,7 +35,7 @@ fn init()
         let tx = gpioa.pa9.into_af7(&mut gpioa.moder, &mut gpioa.afrh);
         let rx = gpioa.pa10.into_af7(&mut gpioa.moder, &mut gpioa.afrh);
     
-        Serial::usart1(dp.USART1, (tx, rx), 115_200.bps(), clocks, &mut rcc.apb2);
+        Serial::usart1(dp.USART1, (tx, rx), 9_600.bps(), clocks, &mut rcc.apb2);
         // If you are having trouble sending/receiving data to/from the
         // HC-05 bluetooth module, try this configuration instead:
         // Serial::usart1(dp.USART1, (tx, rx), 9600.bps(), clocks, &mut rcc.apb2);
@@ -47,6 +47,12 @@ fn init()
         .into_push_pull_output(
             &mut gpioe.moder,
             &mut gpioe.otyper);
+
+        // TODO: trye this access before checking previous line "dp.GPIOA.odr.write(|w| unsafe { w.bits(1)});"
+        let external_button = gpioe.pe7.into_pull_down_input(
+                &mut gpioe.moder,
+                &mut gpioe.pupdr);
+
         let delay = Delay::new(cp.SYST, clocks);   
         unsafe {
             (
@@ -75,7 +81,37 @@ impl UserButton {
     }
     fn handle_user_button(&mut self) -> ButtonState {
         let result: ButtonState;
-        if unsafe { (*stm32f30x::GPIOA::ptr()).idr.read().bits() & 1 != 0 } {
+        if unsafe { (*stm32f30x::GPIOE::ptr()).idr.read().bits() & 1 != 0 } {
+            if self.last_state == true {
+                result = ButtonState::PressedOld;
+            }
+            else {
+                result = ButtonState::PressedNew;
+            }
+            self.last_state = true;
+        }
+        else {
+            if self.last_state == false {
+                result = ButtonState::RiseOld
+            }
+            else {
+                result = ButtonState::RiseNew;
+            }
+            self.last_state = false;
+        }
+        return result;
+    }
+}
+struct PE7Button {
+    last_state: bool,
+}
+impl PE7Button {
+    fn new() -> Self {
+        return Self {last_state:false};
+    }
+    fn handle_user_button(&mut self) -> ButtonState {
+        let result: ButtonState;
+        if unsafe { (*stm32f30x::GPIOE::ptr()).idr.read().idr7().bit_is_set()} {
             if self.last_state == true {
                 result = ButtonState::PressedOld;
             }
@@ -97,7 +133,6 @@ impl UserButton {
     }
 }
 
-
 #[entry]
 fn main() -> ! {
     // initialize user leds
@@ -107,13 +142,12 @@ fn main() -> ! {
     //usart1.tdr.write(|w| w.tdr().bits(u16::from(b'X')));
     let mut led_on = true;
     let mut user_button = UserButton::new();
+    let mut pe7_button = PE7Button::new();
     led.on();
     loop {
-        match user_button.handle_user_button() {
+        match pe7_button.handle_user_button() {
             ButtonState::RiseNew => {
-
                 usart1.tdr.write(|w| w.tdr().bits(u16::from(b'X')));
-                usart1.tdr.write(|w| w.tdr().bits(u16::from(b'\n')));
                 if led_on {
                     led.off();
                 }
@@ -123,7 +157,23 @@ fn main() -> ! {
                 led_on = !led_on;
             },
             _ => {
-                // ignoring
+                match user_button.handle_user_button() {
+                    ButtonState::RiseNew => {
+        
+                        usart1.tdr.write(|w| w.tdr().bits(u16::from(b'X')));
+                        usart1.tdr.write(|w| w.tdr().bits(u16::from(b'\n')));
+                        if led_on {
+                            led.off();
+                        }
+                        else {
+                            led.on();
+                        }
+                        led_on = !led_on;
+                    },
+                    _ => {
+                        // ignoring
+                    }
+                }
             }
         }
         delay.delay_ms(40_u16)

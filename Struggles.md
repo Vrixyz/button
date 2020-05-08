@@ -13,3 +13,5 @@ Interrupt
   - the documentation for [svdrust](https://docs.rs/svd2rust/0.14.0/svd2rust/#peripheral-api) has examples for my crate 
 😃, but when `interrupt` is mentionned, the examples are a bit lacking (initialization there, then follow links to understand 2 different concepts... to reapply to svd2rust then to your specific device...).
 
+User button:
+- I am reading user button via `unsafe { (*stm32f30x::GPIOE::ptr()).idr.read().bits() & 1 != 0 }`, why is it `GPIOE` and not `GPIOA` ? User button is connected to **PA0** pin...
