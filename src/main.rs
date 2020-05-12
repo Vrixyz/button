@@ -81,7 +81,7 @@ impl UserButton {
     }
     fn handle_user_button(&mut self) -> ButtonState {
         let result: ButtonState;
-        if unsafe { (*stm32f30x::GPIOE::ptr()).idr.read().bits() & 1 != 0 } {
+        if unsafe { (*stm32f30x::GPIOA::ptr()).idr.read().bits() & 1 != 0 } {
             if self.last_state == true {
                 result = ButtonState::PressedOld;
             }
@@ -159,9 +159,7 @@ fn main() -> ! {
             _ => {
                 match user_button.handle_user_button() {
                     ButtonState::RiseNew => {
-        
                         usart1.tdr.write(|w| w.tdr().bits(u16::from(b'X')));
-                        usart1.tdr.write(|w| w.tdr().bits(u16::from(b'\n')));
                         if led_on {
                             led.off();
                         }
