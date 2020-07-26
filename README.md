@@ -6,6 +6,13 @@ Currently used with https://github.com/Vrixyz/music.
 - Bluetooth connection is used via a HC-05 module, connected as directed by https://rust-embedded.github.io/discovery/13-serial-over-bluetooth/index.html.
 - External button is wired with a pull down resistor like this: ![button schematics](doc/button_schematics.png)
 
+# Installation
+## Mac
+I use built in bluetooth connection manager to pair the mac to the HC-05 module.
+## Raspberry pi
+- I connect via bluetoothctl, default-agent, pair, trust, connect.
+- I encountered an issue on connect `Failed to connect: org.bluez.Error.NotAvailable`, I fixed thanks to https://www.raspberrypi.org/forums/viewtopic.php?p=947185#p947185
+
 ## TODO
 ### Interrupts
 - Resources:
